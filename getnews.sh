@@ -1,13 +1,13 @@
 #########################################################################
-# Name: Franklin Henriquez          									#
-# Author: Franklin Henriquez (franklin.a.henriquez@gmail.com)			#
-# Creation Date: 19Oct2018  				                            #
-# Last Modified: 20Oct2018					                            #
+# Name: Franklin Henriquez                                              #
+# Author: Franklin Henriquez (franklin.a.henriquez@gmail.com)           #
+# Creation Date: 19Oct2018                                              #
+# Last Modified: 20Oct2018                                              #
 # Description:	Gets news from https://newsapi.org/                     #
 #               Accepts a valid news-id and returns the top headlines.  #
-#									                                    #   
-# Version: 1.0.0					                                    #
-#									                                    #
+#                                                                       #   
+# Version: 1.0.0                                                        #
+#                                                                       #   
 #########################################################################
 
 #!/usr/bin/env bash
