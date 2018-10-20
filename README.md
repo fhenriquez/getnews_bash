@@ -11,21 +11,19 @@ What things you need to install the software and how to install them
 
 ```
 awk
-cur
+curl
 jq
 sed
 ```
 
 ### Installing
 
-Steps
-
 ```
-example
+git clone https://github.com/fhenriquez/getnews_bash.git
 ```
 
+Edit the getnews.sh to add the news_apiKey variable.
 
-End with an example of getting some data out of the system or using it for a little demo
 
 ## Usage
 ```
