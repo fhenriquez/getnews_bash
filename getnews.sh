@@ -231,7 +231,7 @@ function parse_params() {
                     news_random
                     exit 0
                     ;;
-                -s|--sources)
+                -s|--source)
                     news_get "${news_id}" "everything"
                     exit 0
                     ;;
@@ -243,6 +243,11 @@ function parse_params() {
                 -u|--url)
                     #news_get "$1" "top-headlines"
                     url=1
+                    ;;
+                --*)
+                    usage
+                    echo -e "${IYellow}Invalid Parameter${Color_Off}: ${IRed}${param}${Color_Off}"
+                    exit 0
                     ;;
                 *)
                     news_get "${param}" "top-headlines"
@@ -257,7 +262,7 @@ function parse_params() {
 # Custom Variables    #
 #######################
 
-news_apiKey=""
+news_apiKey="534507deacc745ad85175f7672d58404"
 news_api_url="https://newsapi.org/v2/"
 news_sources=$(curl ${news_api_url}sources -s -G -d apiKey=$news_apiKey)
 
@@ -378,7 +383,11 @@ function news_get(){
     news_name=$(news_desc "${news_id}" | grep Name | cut -d ":" -f 2 )
 
 
-    if [ "${resp}" = "error" ];
+    if [ "${resp}" = "error" ] ;
+    then
+        echo -e "News ID: ${Red}${news_id}${Color_Off} does not exist."
+        exit 0
+    elif [ -z "${news_name}" ];
     then
         echo -e "News ID: ${Red}${news_id}${Color_Off} does not exist."
         exit 0
