@@ -262,7 +262,7 @@ function parse_params() {
 # Custom Variables    #
 #######################
 
-news_apiKey="534507deacc745ad85175f7672d58404"
+news_apiKey=""
 news_api_url="https://newsapi.org/v2/"
 news_sources=$(curl ${news_api_url}sources -s -G -d apiKey=$news_apiKey)
 
