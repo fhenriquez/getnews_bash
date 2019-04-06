@@ -1,18 +1,19 @@
+#!/usr/bin/env bash
 #########################################################################
 # Name: Franklin Henriquez                                              #
 # Author: Franklin Henriquez (franklin.a.henriquez@gmail.com)           #
 # Creation Date: 19Oct2018                                              #
-# Last Modified: 20Oct2018                                              #
+# Last Modified: 05Apr2019                                              #
 # Description:	Gets news from https://newsapi.org/                     #
 #               Accepts a valid news-id and returns the top headlines.  #
 #                                                                       #   
-# Version: 1.0.0                                                        #
+# Version: 1.1.0                                                        #
 #                                                                       #   
 #########################################################################
 
-#!/usr/bin/env bash
 # Bash3 Boilerplate. Copyright (c) 2014, kvz.io
 
+#set -x
 set -o errexit
 #set -o pipefail
 set -o nounset
@@ -22,7 +23,7 @@ set -o nounset
 __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 __file="${__dir}/$(basename "${BASH_SOURCE[0]}")"
 __base="$(basename ${__file} .sh)"
-__root="$(cd "$(dirname "${__dir}")" && pwd)" # <-- change this as it depends on your app
+__root="$(cd "$(dirname "${__dir}")" && pwd)" 
 
 # DESC: Handler for unexpected errors
 # ARGS: $1 (optional): Exit code (defaults to 1)
@@ -174,7 +175,8 @@ function colour_init() {
 function usage() {
     echo -e "
     \rUsage: ${__base} <news-id> [options]
-    \rDescription:\tThe script will gather the top headlines for a giving news source.
+    \rDescription:\tThe script will gather the top headlines for" \
+        "a giving news source. 
     
     \rrequired arguments:
     \r<news-id>\tNews id.
@@ -189,6 +191,7 @@ function usage() {
     \r-t|--top\t<news-id> List the top headlines of the news source.
     \r-u|--url\tPrint URL of news articles from source.
     "
+    return 0
 }
 
 # DESC: Parameter parser
@@ -244,9 +247,10 @@ function parse_params() {
                     #news_get "$1" "top-headlines"
                     url=1
                     ;;
-                --*)
+                -*)
                     usage
-                    echo -e "${IYellow}Invalid Parameter${Color_Off}: ${IRed}${param}${Color_Off}"
+                    echo -e "${IYellow}Invalid Parameter${Color_Off}:" \
+                        "${IRed}${param}${Color_Off}"
                     exit 0
                     ;;
                 *)
@@ -258,51 +262,45 @@ function parse_params() {
     done
 }
 
-#######################
-# Custom Variables    #
-#######################
+# DESC: Initialise color variables
+# ARGS: None
+function echo_color_init(){
 
-news_apiKey=""
-news_api_url="https://newsapi.org/v2/"
-news_sources=$(curl ${news_api_url}sources -s -G -d apiKey=$news_apiKey)
+    Color_Off='\033[0m'       # Text Reset
+    NC='\e[m'                 # Color Reset
 
-# Reset
-Color_Off='\033[0m'       # Text Reset
-NC='\e[m'                 # Color Reset
+    # Regular Colors
+    Black='\033[0;30m'        # Black
+    Red='\033[0;31m'          # Red
+    Green='\033[0;32m'        # Green
+    Yellow='\033[0;33m'       # Yellow
+    Blue='\033[0;34m'         # Blue
+    Purple='\033[0;35m'       # Purple
+    Cyan='\033[0;36m'         # Cyan
+    White='\033[0;37m'        # White
 
-# Regular Colors
-Black='\033[0;30m'        # Black
-Red='\033[0;31m'          # Red
-Green='\033[0;32m'        # Green
-Yellow='\033[0;33m'       # Yellow
-Blue='\033[0;34m'         # Blue
-Purple='\033[0;35m'       # Purple
-Cyan='\033[0;36m'         # Cyan
-White='\033[0;37m'        # White
+    # Bold
+    BBlack='\033[1;30m'       # Black
+    BRed='\033[1;31m'         # Red
+    BGreen='\033[1;32m'       # Green
+    BYellow='\033[1;33m'      # Yellow
+    BBlue='\033[1;34m'        # Blue
+    BPurple='\033[1;35m'      # Purple
+    BCyan='\033[1;36m'        # Cyan
+    BWhite='\033[1;37m'       # White
 
-# Bold
-BBlack='\033[1;30m'       # Black
-BRed='\033[1;31m'         # Red
-BGreen='\033[1;32m'       # Green
-BYellow='\033[1;33m'      # Yellow
-BBlue='\033[1;34m'        # Blue
-BPurple='\033[1;35m'      # Purple
-BCyan='\033[1;36m'        # Cyan
-BWhite='\033[1;37m'       # White
+    # High Intensity
+    IBlack='\033[0;90m'       # Black
+    IRed='\033[0;91m'         # Red
+    IGreen='\033[0;92m'       # Green
+    IYellow='\033[0;93m'      # Yellow
+    IBlue='\033[0;94m'        # Blue
+    IPurple='\033[0;95m'      # Purple
+    ICyan='\033[0;96m'        # Cyan
+    IWhite='\033[0;97m'       # White
 
-# High Intensity
-IBlack='\033[0;90m'       # Black
-IRed='\033[0;91m'         # Red
-IGreen='\033[0;92m'       # Green
-IYellow='\033[0;93m'      # Yellow
-IBlue='\033[0;94m'        # Blue
-IPurple='\033[0;95m'      # Purple
-ICyan='\033[0;96m'        # Cyan
-IWhite='\033[0;97m'       # White
-
-######################
-# Custom Functions    #
-#######################
+    return 0
+}
 
 # DESC: Gets if API key is set. 
 # ARGS: $@ (required): API key regex varible.
@@ -311,24 +309,29 @@ function check_api_key(){
     api_key="${1}"
     
     # Validate API key regex.
-    if [[ $news_apiKey =~ ^[0-f]{32}$ ]]
+    if [[ "${api_key}" =~ ^[0-f]{32}$ ]]
     then
         return 0    
     else
         # Print line number to check variable.
-        variable_line_num=$(grep -n "news_apiKey=" ${__file} | cut -d ':' -f 1 | head -n 1)
+        variable_line_num=$(grep -n "api_key=" ${__file} | \
+            cut -d ':' -f 1 | head -n 1)
         echo -e "Please validate ${Red}API Key${Color_Off}: ${api_key}
-                \rReview ${__file} ${IYellow}line number${Color_Off}: ${variable_line_num}"
+                \rReview ${__file} ${IYellow}line number${Color_Off}:" \
+                " ${variable_line_num}"
 
         exit 0
     fi
+
 }
+
 # DESC: Retrieves the description of a news_id.
 # ARGS: $@ (required): Valid news id. 
 function news_desc()
 {
     news_id="${1}"
-    news_desc=$(echo ${news_sources} | jq .[] | grep -w -A 6 -F "${news_id}" | head -n 7)
+    news_desc=$(echo ${news_sources} |\
+        jq ".sources[] | select(.id==\"${news_id}\")" )
     if [ -z "${news_id}" ]
     then
         echo -e "${IYellow}Please select a news-id.${Color_Off}"
@@ -339,34 +342,29 @@ function news_desc()
         exit 0
     else
 
+    # echo ${news_desc} | jq # pretty print json
     # Setup template to print
-    ID=`echo "${news_desc}" | sed -e $'s/", "/\\\n/g' | sed 's/"//g' | sed -n '1p' \
-        | cut -d ':' -f 2 | sed 's/,$//'`
-    Name=`echo "${news_desc}" | sed -e $'s/", "/\\\n/g' | sed 's/"//g' | sed -n '2p' \
-        | cut -d ':' -f 2 | sed 's/,$//'`
-    Description=`echo "${news_desc}" | sed -e $'s/", "/\\\n/g' | sed 's/"//g' \
-        | sed -n '3p' | cut -d ':' -f 2 | sed 's/,$//'`
-    URL=`echo "${news_desc}" | sed -e $'s/", "/\\\n/g' | sed 's/"//g' | sed -n '4p' \
-        | cut -d ',' -f 1 | awk '{print $2}'`
-    Category=`echo "${news_desc}" | sed -e $'s/", "/\\\n/g' | sed 's/"//g' | sed -n '5p' \
-        | cut -d ':' -f 2 | sed 's/,$//'`
-    Language=`echo "${news_desc}" | sed -e $'s/", "/\\\n/g' | sed 's/"//g' | sed -n '6p' \
-        | cut -d ':' -f 2 | sed 's/,$//'`
-    Country=`echo "${news_desc}" | sed -e $'s/", "/\\\n/g' | sed 's/"//g' | sed -n '7p' \
-        | cut -d ':' -f 2 | sed 's/,$//'`
-
+	ID=$(echo ${news_desc} | jq .[] | sed -n '1p' | sed 's/"//g')
+	Name=$(echo ${news_desc} | jq .[] | sed -n '2p' | sed 's/"//g')
+	Description=$(echo ${news_desc} | jq .[] | sed -n '3p' | sed 's/"//g')
+	URL=$(echo ${news_desc} | jq .[] | sed -n '4p' | sed 's/"//g')
+	Category=$(echo ${news_desc} | jq .[] | sed -n '5p' | sed 's/"//g')
+	Language=$(echo ${news_desc} | jq .[] | sed -n '6p' | sed 's/"//g')
+	Country=$(echo ${news_desc} | jq .[] | sed -n '7p' | sed 's/"//g')
 
     # Print Template
     echo -e "
-    \r${ICyan}ID:${Color_Off}${ID}
-    \r${ICyan}Name:${Color_Off}${Name}
-    \r${ICyan}Description:${Color_Off}${Description}
-    \r${ICyan}URL: ${Color_Off}${URL}
-    \r${ICyan}Category:${Color_Off}${Category}
-    \r${ICyan}Language:${Color_Off}${Language}
-    \r${ICyan}Country:${Color_Off}${Country}
+    \r${ICyan}ID:${Color_Off} ${ID}
+    \r${ICyan}Name:${Color_Off} ${Name}
+    \r${ICyan}Description:${Color_Off} ${Description}
+    \r${ICyan}URL:${Color_Off} ${URL}
+    \r${ICyan}Category:${Color_Off} ${Category}
+    \r${ICyan}Language:${Color_Off} ${Language}
+    \r${ICyan}Country:${Color_Off} ${Country}
     "
     fi
+
+    return 0
 }
 
 # DESC: Retrieves news from specific news_id.
@@ -378,7 +376,8 @@ function news_get(){
     url_links="${url}"
    
     # Validate news_id. 
-    resp=$(curl ${news_api_url}\\${url_get} -s -G -d sources=${news_id} -d apiKey=$news_apiKey | jq -r '.status')
+    resp=$(curl ${news_api_url}\\${url_get} -s -G -d sources=${news_id} \
+        -d apiKey=$news_apiKey | jq -r '.status')
 
     news_name=$(news_desc "${news_id}" | grep Name | cut -d ":" -f 2 )
 
@@ -394,10 +393,12 @@ function news_get(){
     elif [ "${url_links}" -eq 1 ]
     then
         echo -e "\n${ICyan}News from the ${news_name/ /${BRed}}${Color_Off}:"
-        curl ${news_api_url}\\${url_get} -s -G -d sources=${news_id} -d apiKey=$news_apiKey | jq -r '.articles[] | .title, .url'
+        curl ${news_api_url}\\${url_get} -s -G -d sources=${news_id} \
+            -d apiKey=$news_apiKey | jq -r '.articles[] | .title, .url'
     else
         echo -e "\n${ICyan}News from the ${news_name/ /${BRed}}${Color_Off}:"
-        curl ${news_api_url}\\${url_get} -s -G -d sources=${news_id} -d apiKey=$news_apiKey | jq -r '.articles[] | .title'
+        curl ${news_api_url}\\${url_get} -s -G -d sources=${news_id} \
+            -d apiKey=$news_apiKey | jq -r '.articles[] | .title'
     fi
 
 }
@@ -444,9 +445,11 @@ function news_sources_list() {
     
     if [ "${language}" = "all" ];
     then
-        echo ${news_sources} | jq '.sources[] | .name, .id' | sed 's/"//g' | awk 'NR%2{printf "%s ",$0;next;}1' 
+        echo ${news_sources} | jq '.sources[] | .id' | sed 's/"//g'
     else
-        echo ${news_sources} | jq ".sources[] | select(.language==\"${language}\") | .name, .id" | sed 's/"//g' \
+        echo ${news_sources} | \
+            jq ".sources[] | select(.language==\"${language}\") | .name, .id" \
+            | sed 's/"//g' \
         | awk 'NR%2{printf "%s ",$0;next;}1' 
     fi
 }
@@ -465,7 +468,9 @@ function news_sources_id() {
     then
         echo ${news_sources} | jq '.sources[] | .id' | sed 's/"//g'
     else
-        echo ${news_sources} | jq ".sources[] | select(.language==\"${language}\") | .id" | sed 's/"//g'
+        echo ${news_sources} | \
+            jq ".sources[] | select(.language==\"${language}\") | .id" | \
+            sed 's/"//g'
     fi
 }
 
@@ -480,6 +485,7 @@ function main() {
 
     script_init
     colour_init
+    echo_color_init
     
     # Print usage if no parameters are entered.
     if [ $# -eq 0 ]
@@ -487,9 +493,21 @@ function main() {
         usage
         exit 2
     fi
-    
+
+    news_apiKey=""
+
+    # Sourcing the api key to keep it private.
+    if [ -z "${news_apiKey}" ]
+    then
+        source "${__dir}/newsapi.key"
+    fi
+   
     # Check API key.
     check_api_key "${news_apiKey}"
+
+    news_api_url="https://newsapi.org/v2/"
+    news_sources=$(curl ${news_api_url}sources -s -G -d apiKey=$news_apiKey)
+
     # Check to see if url is enabled in the parameters.
     if [[ "$@" == *"-u"* ]] 
     then
@@ -499,7 +517,8 @@ function main() {
     fi
     
     get_params="$@"
-    sorted_params=$( echo ${get_params} | tr ' ' '\n' | sort | tr '\n' ' ' | sed 's/ *$//')
+    sorted_params=$( echo ${get_params} | tr ' ' '\n' | sort | tr '\n' ' ' | \
+                    sed 's/ *$//')
     parse_params "${sorted_params}"
     
 }
