@@ -6,9 +6,9 @@
 # Last Modified: 05Apr2019                                              #
 # Description:	Gets news from https://newsapi.org/                     #
 #               Accepts a valid news-id and returns the top headlines.  #
-#                                                                       #   
+#                                                                       #
 # Version: 1.1.0                                                        #
-#                                                                       #   
+#                                                                       #
 #########################################################################
 
 # Bash3 Boilerplate. Copyright (c) 2014, kvz.io
@@ -23,7 +23,7 @@ set -o nounset
 __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 __file="${__dir}/$(basename "${BASH_SOURCE[0]}")"
 __base="$(basename ${__file} .sh)"
-__root="$(cd "$(dirname "${__dir}")" && pwd)" 
+__root="$(cd "$(dirname "${__dir}")" && pwd)"
 
 # DESC: Handler for unexpected errors
 # ARGS: $1 (optional): Exit code (defaults to 1)
@@ -176,8 +176,8 @@ function usage() {
     echo -e "
     \rUsage: ${__base} <news-id> [options]
     \rDescription:\tThe script will gather the top headlines for" \
-        "a giving news source. 
-    
+        "a giving news source.
+
     \rrequired arguments:
     \r<news-id>\tNews id.
 
@@ -187,6 +187,7 @@ function usage() {
     \r-l|--list\tList all English speaking news sources.
     \r-h|--help\tShow this help message and exit.
     \r-i|--id\t\tList all English speaking news sources id.
+    \r-r|--random\tList random English speaking new source.
     \r-s|--source\t<news-id> List all articles of the news source.
     \r-t|--top\t<news-id> List the top headlines of the news source.
     \r-u|--url\tPrint URL of news articles from source.
@@ -201,7 +202,7 @@ function parse_params() {
     while [[ $# -gt 0 ]]; do
         #param="${1}"
         params=$(echo ${1})
-        
+
         # Getting the last parameter which should be the news_id.
         news_id=$(echo $params | awk 'NF>1{print $NF}')
         shift
@@ -302,16 +303,16 @@ function echo_color_init(){
     return 0
 }
 
-# DESC: Gets if API key is set. 
+# DESC: Gets if API key is set.
 # ARGS: $@ (required): API key regex varible.
 function check_api_key(){
 
     api_key="${1}"
-    
+
     # Validate API key regex.
     if [[ "${api_key}" =~ ^[0-f]{32}$ ]]
     then
-        return 0    
+        return 0
     else
         # Print line number to check variable.
         variable_line_num=$(grep -n "api_key=" ${__file} | \
@@ -326,7 +327,7 @@ function check_api_key(){
 }
 
 # DESC: Retrieves the description of a news_id.
-# ARGS: $@ (required): Valid news id. 
+# ARGS: $@ (required): Valid news id.
 function news_desc()
 {
     news_id="${1}"
@@ -368,14 +369,14 @@ function news_desc()
 }
 
 # DESC: Retrieves news from specific news_id.
-# ARGS: $@ (required): news_id. 
+# ARGS: $@ (required): news_id.
 function news_get(){
-    
+
     news_id="${1}"
     url_get="${2}"
     url_links="${url}"
-   
-    # Validate news_id. 
+
+    # Validate news_id.
     resp=$(curl ${news_api_url}\\${url_get} -s -G -d sources=${news_id} \
         -d apiKey=$news_apiKey | jq -r '.status')
 
@@ -404,9 +405,9 @@ function news_get(){
 }
 
 # DESC: Retrieves the top news from random english speaking news_id.
-# ARGS: $@ (optional): Add URL links. 
+# ARGS: $@ (optional): Add URL links.
 function news_random(){
-    
+
     url_links=${url}
 
     en_news_id=$(news_sources_id "en" | tail -n +4 )
@@ -431,18 +432,18 @@ function news_random(){
         news_get ${news_id} "top-headlines"
     else
         news_get "${news_id}" "top-headlines"
-    fi    
+    fi
 }
 
 # DESC: List all sources name along with id.
-# ARGS: $@ (opitional): Language abbreviation. 
+# ARGS: $@ (opitional): Language abbreviation.
 function news_sources_list() {
     language="${1}"
-    
+
     echo -e "${ICyan}#-----------------#
             \r#${Color_Off} Name    ID${ICyan}      #
             \r#-----------------#${Color_Off}"
-    
+
     if [ "${language}" = "all" ];
     then
         echo ${news_sources} | jq '.sources[] | .id' | sed 's/"//g'
@@ -450,15 +451,15 @@ function news_sources_list() {
         echo ${news_sources} | \
             jq ".sources[] | select(.language==\"${language}\") | .name, .id" \
             | sed 's/"//g' \
-        | awk 'NR%2{printf "%s ",$0;next;}1' 
+        | awk 'NR%2{printf "%s ",$0;next;}1'
     fi
 }
 
 # DESC: List all sources id.
-# ARGS: $@ (opitional): Language abbreviation. 
+# ARGS: $@ (opitional): Language abbreviation.
 function news_sources_id() {
     language="${1}"
-    
+
      echo -e "${ICyan}#-----------------#
             \r#${Color_Off} ID${ICyan}              #
             \r#-----------------#${Color_Off}"
@@ -486,7 +487,7 @@ function main() {
     script_init
     colour_init
     echo_color_init
-    
+
     # Print usage if no parameters are entered.
     if [ $# -eq 0 ]
     then
@@ -501,7 +502,7 @@ function main() {
     then
         source "${__dir}/newsapi.key"
     fi
-   
+
     # Check API key.
     check_api_key "${news_apiKey}"
 
@@ -509,18 +510,18 @@ function main() {
     news_sources=$(curl ${news_api_url}sources -s -G -d apiKey=$news_apiKey)
 
     # Check to see if url is enabled in the parameters.
-    if [[ "$@" == *"-u"* ]] 
+    if [[ "$@" == *"-u"* ]]
     then
         url=1
     else
         url=0
     fi
-    
+
     get_params="$@"
     sorted_params=$( echo ${get_params} | tr ' ' '\n' | sort | tr '\n' ' ' | \
                     sed 's/ *$//')
     parse_params "${sorted_params}"
-    
+
 }
 
 # Make it rain
